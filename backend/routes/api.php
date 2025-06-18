@@ -3,7 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\UserController; // ← TAMBAHKAN BARIS INI
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\MateriController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -23,3 +24,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 Route::get('/test', function () {
     return response()->json(['message' => 'test ok']);
 });
+
+
+Route::get('/materi', [MateriController::class, 'index']);
+Route::post('/materi', [MateriController::class, 'store']);

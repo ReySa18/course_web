@@ -65,28 +65,48 @@
       </div>
 
       <!-- Responsive card grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <div
-          v-for="card in articles"
-          :key="card.id"
-          class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
-        >
-          <div class="flex items-center justify-between mb-3 md:mb-4">
-            <div :class="card.tagClass" class="px-2 py-1 md:px-3 md:py-1 rounded-full">
-              <span class="text-white text-xs font-medium">{{ card.tag }}</span>
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-white mb-4">Kumpulan Materi</h1>
+
+        <div v-if="loading" class="text-gray-300">Memuat materi...</div>
+        <div v-else-if="articles.length === 0" class="text-gray-300">Belum ada materi.</div>
+
+        <!-- Responsive card grid -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div
+            v-for="card in articles"
+            :key="card.id"
+            class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
+          >
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+              <div :class="card.tagClass" class="px-2 py-1 md:px-3 md:py-1 rounded-full">
+                <span class="text-white text-xs font-medium">{{ card.tag }}</span>
+              </div>
+              <svg
+                v-if="card.icon === 'heart'"
+                class="w-7 h-7 md:w-8 md:h-8 text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                ></path>
+              </svg>
             </div>
-            <svg v-if="card.icon === 'heart'" class="w-7 h-7 md:w-8 md:h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-            <div v-if="card.icon === 'image'" class="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden -mt-7 -mr-2">
-                <img :src="card.image" alt="Tutorial" class="w-full h-full object-cover">
+            <h3 class="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3 leading-tight">
+              {{ card.title }}
+            </h3>
+            <p class="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
+              {{ card.description }}
+            </p>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-400 text-xs">{{ card.author }}</span>
+              <div class="progress-bar h-1.5 md:h-2 rounded-full" :style="{ width: card.progressWidth }"></div>
             </div>
-          </div>
-          <h3 class="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3 leading-tight">{{ card.title }}</h3>
-          <p class="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">{{ card.description }}</p>
-          <div class="flex items-center justify-between">
-            <span class="text-gray-400 text-xs">{{ card.author }}</span>
-            <div class="progress-bar h-1.5 md:h-2 rounded-full" :style="{ width: card.progressWidth }"></div>
           </div>
         </div>
       </div>
@@ -125,72 +145,60 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const articles = ref([
-  {
-    id: 1,
-    tag: 'Laravel',
-    tagClass: 'tag-gradient',
-    icon: 'heart',
-    title: 'Tutorial Laravel 11 untuk Pemula: Langsung Bisa bikin CRUD!',
-    description: 'Tutorial Laravel 11 cocok untuk pemula disertai latihan membuat CRUD dari awal. Dijamin kamu akan paham Laravel setelah mengikuti tutorial ini.',
-    author: '@petanikode',
-    progressWidth: '64px',
-  },
-  {
-    id: 2,
-    tag: 'Redis',
-    tagClass: 'tag-gradient-2',
-    icon: 'none',
-    title: 'Tutorial Membuat Sistem Notifikasi dengan Redis Pub/Sub di Golang',
-    description: 'Step-by-step cara membuat sistem notifikasi secara realtime dengan Redis Pub/Sub di Golang',
-    author: '@petanikode',
-    progressWidth: '80px',
-  },
-  {
-    id: 3,
-    tag: 'C++',
-    tagClass: 'tag-gradient-3',
-    icon: 'none',
-    title: 'Belajar C++ #13: Mengenal Tipe Data Union',
-    description: 'Pada tutorial ini, kita akan belajar tentang tipe data union di C++. Mengapa kita butuh Union dan apa bedanya dengan Struct? Simak selengkapnya...',
-    author: '@petanikode',
-    progressWidth: '48px',
-  },
-  {
-    id: 4,
-    tag: 'Data Structure',
-    tagClass: 'tag-gradient-4',
-    icon: 'none',
-    title: 'Belajar C++ #12: Mengenal Tipe Data Struct',
-    description: 'Pada tutorial ini, kita akan berkenalan dengan tipe data struct dan gimana cara menggunakan Struct di C++.',
-    author: '@petanikode',
-    progressWidth: '56px',
-  },
-  {
-    id: 5,
-    tag: 'Enum',
-    tagClass: 'tag-gradient-5',
-    icon: 'none',
-    title: 'Belajar C++ #11: Tipe Data Enum di C++',
-    description: 'Pada tutorial ini, kita akan membahas tentang tipe data enum di C++. Mulai dari pengertian enum, cara membuat enum, cara menggunakan enum pada program C++...',
-    author: '@petanikode',
-    progressWidth: '40px',
-  },
-  {
-    id: 6,
-    tag: 'Pointer',
-    tagClass: 'tag-gradient-6',
-    icon: 'image',
-    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMzIiIGZpbGw9IiM0Qjc2ODgiLz4KPHN2ZyB4PSIxNiIgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Im0xNiAxOCA0LTQtNC00bTQgNEg0Ii8+Cjwvc3ZnPgo8L3N2Zz4K',
-    title: 'Belajar C++ #14: Memahami Pointer di C++',
-    description: 'Apa itu Pointer? dan gimana cara kerja pointer? Mari kita pelajari lebih dalam tentang pointer...',
-    author: '@petanikode',
-    progressWidth: '32px',
-  },
-]);
+const articles = ref([])
+const loading = ref(true)
+
+const fetchMateri = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/materi')
+    articles.value = response.data.map((item) => ({
+      id: item.id,
+      tag: item.label,
+      tagClass: getTagClass(item.label),
+      icon: item.thumbnail ? 'image' : 'none',
+      image: item.thumbnail,
+      title: item.judul,
+      description: item.deskripsi,
+      author: '@admin',
+      progressWidth: getRandomProgressWidth(),
+    }))
+  } catch (error) {
+    console.error('Gagal mengambil data materi:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const getTagClass = (label) => {
+  // Sesuaikan warna label dengan class Tailwind milikmu
+  switch (label.toLowerCase()) {
+    case 'algoritma':
+      return 'tag-gradient'
+    case 'database':
+      return 'tag-gradient-2'
+    case 'oop':
+      return 'tag-gradient-3'
+    case 'web':
+      return 'tag-gradient-4'
+    default:
+      return 'tag-gradient-5'
+  }
+}
+
+const getRandomProgressWidth = () => {
+  // Simulasi progressWidth acak
+  const widths = ['32px', '40px', '48px', '56px', '64px', '72px', '80px']
+  return widths[Math.floor(Math.random() * widths.length)]
+}
+
+onMounted(() => {
+  fetchMateri()
+})
 </script>
+
 
 <style>
 /* Import Google Fonts */
